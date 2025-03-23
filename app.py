@@ -3,7 +3,6 @@ import librosa
 import numpy as np
 import os
 import pickle
-import keras
 import tempfile
 
 # Define emotion mapping as per your model's training
