@@ -3,9 +3,9 @@ import librosa
 import numpy as np
 import os
 import pickle
-import tempfile
+import tempfile  # For handling uploaded files
 
-# Define emotion mapping as per your model's training
+# Define emotion mapping (update according to your model's labels)
 emotions = {
     1: "Neutral",
     2: "Calm",
@@ -17,8 +17,9 @@ emotions = {
     8: "Surprised"
 }
 
-# Load your trained model
+# Load the trained model
 MODEL_PATH = "trained_model.pkl"
+
 if os.path.exists(MODEL_PATH):
     with open(MODEL_PATH, "rb") as file:
         model = pickle.load(file)
@@ -29,44 +30,42 @@ else:
 # Function to extract MFCC features from an audio file
 def extract_mfcc(file_path):
     try:
-        y, sr = librosa.load(file_path)
+        y, sr = librosa.load(file_path, sr=None)
         mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=40)
-        mfcc_features = np.mean(mfcc.T, axis=0)
+        mfcc_features = np.mean(mfcc.T, axis=0)  # Convert to 1D feature vector
         return mfcc_features
     except Exception as e:
         st.error(f"Error extracting features: {e}")
         return None
 
-# Streamlit app layout
-st.title("Speech Emotion Recognition")
-st.write("Upload a .wav audio file to predict its emotion.")
+# Streamlit UI
+st.title("🎙️ Speech Emotion Recognition")
+st.write("Upload a `.wav` audio file to predict its emotion.")
 
-uploaded_file = st.file_uploader("Upload Audio File", type=["wav"])
+uploaded_file = st.file_uploader("Upload an Audio File", type=["wav"])
 
 if uploaded_file is not None:
-    # Save uploaded file temporarily
-    temp_dir = "temp"
-    os.makedirs(temp_dir, exist_ok=True)
-    temp_path = os.path.join(temp_dir, uploaded_file.name)
-    with open(temp_path, "wb") as f:
-        f.write(uploaded_file.getbuffer())
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as temp_audio:
+        temp_audio.write(uploaded_file.getbuffer())
+        temp_path = temp_audio.name  # Get the path of the temp file
 
-    # Extract MFCC features
+    # Extract features
     st.info("Extracting features...")
     features = extract_mfcc(temp_path)
 
     if features is not None:
-        # Reshape features for prediction (matching the input shape during training)
-        features = np.reshape(features, newshape=(1, 40, 1))
+        # Reshape features to match model input shape
+        features = np.reshape(features, (1, -1))  # (1, 40) shape
 
-        # Make prediction
         if model:
+            # Predict emotion
             predictions = model.predict(features)
-            # Get the emotion with the highest prediction probability
-            predicted_emotion = emotions[np.argmax(predictions[0]) + 1]
-            st.success(f"Prediction: {predicted_emotion}")
+            predicted_label = np.argmax(predictions) + 1  # Get class index
+            predicted_emotion = emotions.get(predicted_label, "Unknown")
+            
+            st.success(f"🎭 Prediction: {predicted_emotion}")
         else:
             st.error("Model not loaded!")
 
-    # Clean up temporary file
+    # Remove temporary file
     os.remove(temp_path)
