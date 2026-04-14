@@ -22,42 +22,6 @@ Speech-Emotion-Detection/
 └── .gitignore                  # To ignore unnecessary files
 ```
 
-## Getting Started
-
-### Prerequisites
-
-- Python 3.8 or above
-- Recommended: Virtual environment for dependency management
-
-### Installation
-
-1. Clone the repository:
-   ```bash
-   git clone <your-repository-URL>
-   cd Speech-Emotion-Detection
-   ```
-
-2. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. Ensure the `trained_model.pkl` file is in the repository root.
-
-### Running the Application
-
-1. Start the Streamlit application:
-   ```bash
-   streamlit run app.py
-   ```
-
-2. Open the local URL in your browser (e.g., `http://localhost:8501`).
-
-3. Upload a `.wav` file to predict its emotion.
-
-### Training the Model
-
-The `speech-emotion-detection.ipynb` file contains code for training and testing the emotion detection model. You can use this notebook to experiment with the dataset or retrain the model.
 
 
 ## Built With
